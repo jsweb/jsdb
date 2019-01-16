@@ -1,5 +1,5 @@
 {
-  "name": "jsdb",
+  "name": "@jsweb/jsdb",
   "version": "0.1.0",
   "description": "Simple NoSQL like embedded JSON database for modern Node.js applications.",
   "scripts": {

@@ -36,6 +36,7 @@ Not tested with large applications in production, but recommended for small to m
       - [filterUpdate(value: any, filter: function)](#filterupdatevalue-any-filter-function)
       - [filterReplace(value: any, filter: function)](#filterreplacevalue-any-filter-function)
       - [filterDelete(filter: function)](#filterdeletefilter-function)
+  - [TODO](#todo)
 
 ## Install
 
@@ -236,3 +237,10 @@ Works the same way as `filterUpdate`, but combines `filter` + `replace` methods.
 #### filterDelete(filter: function)
 
 Combines `filter` + `delete` methods for batch deletes.
+
+***
+
+## TODO
+
+- [ ] Paginate list results
+- [ ] Browser version

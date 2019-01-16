@@ -1,5 +1,4 @@
 import typescript from 'rollup-plugin-typescript'
-import esmin from 'rollup-plugin-esmin'
 import pack from './package.json'
 
 const name = pack.name
@@ -16,6 +15,7 @@ const banner = `/**
 export default [{
   input: 'src/module.ts',
   plugins: [typescript()],
+  external: ['fs', 'path', 'shelljs', '@jsweb/randkey'],
   output: {
     name,
     banner,
@@ -23,12 +23,13 @@ export default [{
     file: 'dist/module.js'
   }
 }, {
-  input: 'src/umd.ts',
-  plugins: [typescript(), esmin()],
+  input: 'src/module.ts',
+  plugins: [typescript()],
+  external: ['fs', 'path', 'shelljs', '@jsweb/randkey'],
   output: {
     name,
     banner,
-    format: 'umd',
-    file: 'dist/umd.js'
+    format: 'cjs',
+    file: 'dist/common.js'
   }
 }]

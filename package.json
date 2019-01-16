@@ -21,7 +21,9 @@
     "js",
     "json",
     "javascript",
-    "database"
+    "database",
+    "nosql",
+    "embedded"
   ],
   "author": "Alex Bruno Cáceres <git.alexbr@outlook.com>",
   "license": "MIT",

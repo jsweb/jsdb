@@ -1,6 +1,41 @@
 # @jsweb/jsdb
 
-Simple embedded JSON database for modern Node.js applications.
+Simple NoSQL like embedded JSON database for modern Node.js applications.
+
+- Vanilla JSON data store
+- Vanilla Javascript API
+- Multiple JSON files (one for each store)
+- Asynchronous
+- Fast enought
+
+Not tested with large applications in production, but recommended for small to medium applications (almost all).
+
+***
+
+- [@jsweb/jsdb](#jswebjsdb)
+  - [Install](#install)
+  - [Usage](#usage)
+  - [JSON files](#json-files)
+  - [Auto ID](#auto-id)
+  - [Auto optimization](#auto-optimization)
+  - [Database intance](#database-intance)
+    - [Auto timestamps](#auto-timestamps)
+    - [Methods](#methods)
+      - [drop (name: string)](#drop-name-string)
+      - [store(name: string)](#storename-string)
+  - [Store instance](#store-instance)
+    - [Methods](#methods-1)
+      - [parse()](#parse)
+      - [truncate()](#truncate)
+      - [push(...args: any[])](#pushargs-any)
+      - [find(find: function)](#findfind-function)
+      - [filter(filter: function)](#filterfilter-function)
+      - [update(value: any, find?: function)](#updatevalue-any-find-function)
+      - [replace(value: any, find?: function)](#replacevalue-any-find-function)
+      - [delete(id: string, find?: function)](#deleteid-string-find-function)
+      - [filterUpdate(value: any, filter: function)](#filterupdatevalue-any-filter-function)
+      - [filterReplace(value: any, filter: function)](#filterreplacevalue-any-filter-function)
+      - [filterDelete(filter: function)](#filterdeletefilter-function)
 
 ## Install
 
@@ -15,9 +50,9 @@ yarn add @jsweb/jsdb
 ## Usage
 
 ```javascript
-import JSDB from '@jsweb/jsdb'
+import Databse from '@jsweb/jsdb'
 
-const db = new JSDB('base', 'path', 'dir') // or just base/path/dir
+const db = new Databse('base', 'path', 'dir') // or just base/path/dir
 
 const posts = db.store('posts') // a JSON store into db
 ```
@@ -28,7 +63,7 @@ The base path directory is relative to de process root directory. It will be aut
 
 ## JSON files
 
-All your data will be stored in JSON files. The root object in the JSON are an Array and expects to store Objects. Like this:
+All your data will be stored in JSON files. The root object in the JSON is an Array and expects to store Objects. Like this:
 
 ```javascript
 [
@@ -62,4 +97,142 @@ If you need to look at your data by indexing the value provided by yourself, jus
 
 If you are running in `production` mode, then JSON will be minimized. Else it will be indented to develop, test or debug.
 
-## Methods
+## Database intance
+
+Just import and instance a database into a base path.
+
+Database instance have a public `get` for the base dir absolute path, and public `get/set` for auto timestamps.
+
+```javascript
+import Database from '@jsweb/jsdb'
+
+const db = new Database('base', 'path', 'dir')
+
+db.path // get (only) full OS path to database dir
+
+db.timestamps // it is false by default
+
+db.timestamps = true // now it is true
+```
+
+### Auto timestamps
+
+Use it to set auto timestamps on/off (default off).
+
+Turning on auto timestamps will include `createdAt` and `updatedAt` automatic fields on all entries. Values will be datetime strings, resulting from `new Date()` native object serialized to JSON.
+
+### Methods
+
+#### drop (name: string)
+
+Use it to drop a store from database. JSON file will be deleted.
+
+```javascript
+import Database from '@jsweb/jsdb'
+
+const db = new Database('base', 'path', 'dir')
+
+db.drop('posts')
+```
+
+#### store(name: string)
+
+Use it to instance a JSON store from database. JSON file will be created, if it not exists.
+
+```javascript
+import Database from '@jsweb/jsdb'
+
+const db = new Database('base', 'path', 'dir')
+
+const posts = db.store('posts')
+```
+
+This method returns a Store instance, with methods to operate data in JSON files.
+
+## Store instance
+
+This istance is the object to interact with JSON data.
+
+Like database instance, store have a public `get` for the JSON file absolute path.
+
+### Methods
+
+All methods from store instance are `async`, so it is necessary to use them in Promise like syntax or with `async/await` functions.
+
+Exemple:
+
+```javascript
+import Database from '@jsweb/jsdb'
+
+const db = new Database('base', 'path', 'dir')
+
+const posts = db.store('posts')
+
+const allPosts = await posts.parse()
+// or
+posts.parse().then(allPosts => {
+  // ...
+})
+```
+
+#### parse()
+
+Parses data from JSON file and returns it to use in code.
+
+#### truncate()
+
+It is to clean the store data and make it empty.
+
+#### push(...args: any[])
+
+It is just native `Array.push` (but async), adding new entries to data store.
+
+#### find(find: function)
+
+It is just native `Array.find` (but async), picking an entry from data store which match the `find` function return. If none match, returns `undefined`.
+
+#### filter(filter: function)
+
+It is just native `Array.filter` (but async), picking entries from data store which match the `filter` function return. If none match, returns `[]`.
+
+#### update(value: any, find?: function)
+
+Updates an entry in data store by assign `value` to target entry, merging data. Same effect as `Object.assign(entry, value)`.
+
+`value` must be a literal object with `keys/values` for update.
+
+If `id` is present in `value`, the entry for update will be picked by `id`.
+
+Optionally, `find` function can be used like `Array.find(function)` to pick into data store the exact entry for update.
+
+Only entry `id` will be automatically preserved by store because it is immutable, cannot be reassigned.
+
+#### replace(value: any, find?: function)
+
+Works the same way as `update` method, but updates an entry in data store by replacing it. Same effect as `entry = value`.
+
+#### delete(id: string, find?: function)
+
+Deletes an entry from data store.
+
+If `id` is provided, picks the entry by `id` for delete.
+
+Optionally, it is possible to pass `null` for `id` and `find` function can be used like `Array.find(function)` to pick into data store the exact entry for delete.
+
+#### filterUpdate(value: any, filter: function)
+
+As the name suggests, this is a convenient method combining `filter` + `update` methods for batch updates.
+
+`value` must be a literal object with `keys/values` for update.
+
+If `id` is present in `value`, `update` method will be invoked instead and only one entry will be updated by `id`.
+
+Else, `filter` function will be used the way like `Array.filter(function)` to match all entries for update.
+
+#### filterReplace(value: any, filter: function)
+
+Works the same way as `filterUpdate`, but combines `filter` + `replace` methods.
+
+#### filterDelete(filter: function)
+
+Combines `filter` + `delete` methods for batch deletes.

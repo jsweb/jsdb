@@ -1,7 +1,7 @@
 {
   "name": "jsdb",
   "version": "0.0.0",
-  "description": "Simple embedded JSON database for modern Node.js applications",
+  "description": "Simple NoSQL like embedded JSON database for modern Node.js applications.",
   "scripts": {
     "test": "echo 'Error: no test specified' && exit 1",
     "clean": "shx rm -rf dist",
@@ -48,7 +48,6 @@
   "module": "dist/module.js",
   "types": "dist/module.d.ts",
   "dependencies": {
-    "@jsweb/asyncs": "^3.0.6",
     "@jsweb/randkey": "^3.3.5",
     "shelljs": "^0.8.3"
   }

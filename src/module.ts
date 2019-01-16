@@ -1,28 +1,42 @@
 import { join } from 'path';
 import { mkdir, rm } from 'shelljs';
-import DataBase from './database';
+import Store from './store';
 
-export default class JSDB {
-  public timestamps: boolean = false;
-  public base: string;
-  private stores: any = {};
+export default class Database {
+  private PATH: string;
+  private TIMESTAMPS: boolean = false;
+  private STORES: { [name: string]: Store } = {};
 
-  constructor(...args: string[]) {
-    this.base = join(process.cwd(), ...args);
-    mkdir('-p', this.base);
+  public get path(): string {
+    return this.PATH;
   }
 
-  public setTimestamps(auto: boolean) {
-    this.timestamps = auto;
+  public get timestamps(): boolean {
+    return this.TIMESTAMPS;
+  }
+
+  public set timestamps(auto: boolean) {
+    this.TIMESTAMPS = auto;
+  }
+
+  constructor(...args: string[]) {
+    this.PATH = join(process.cwd(), ...args);
+    mkdir('-p', this.PATH);
   }
 
   public store(name: string) {
-    this.stores[name] = this.stores[name] || new DataBase(this, name);
-    return this.stores[name];
+    this.STORES[name] = this.STORES[name] || new Store(this, name);
+    return this.STORES[name];
   }
 
   public drop(name: string) {
-    rm(this.stores[name].path);
-    delete this.stores[name];
+    const store = this.STORES[name];
+    const path = join(this.PATH, `${name}.json`);
+
+    if (store) {
+      delete this.STORES[name];
+    }
+
+    rm(path);
   }
 }

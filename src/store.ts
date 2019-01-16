@@ -1,33 +1,32 @@
 import { wuid } from '@jsweb/randkey';
 import { existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import JSDB from './module';
+import Database from './module';
 import { readJSON, writeJSON } from './utils/files';
 
-export default class DataBase {
-  public base: string;
-  public name: string;
-  public file: string;
-  public path: string;
-  public timestamps: boolean;
+export default class Store {
+  private TIMESTAMPS: boolean;
+  private DATABASE: string;
+  private PATH: string;
 
-  constructor(jsdb: JSDB, name: string) {
-    this.timestamps = jsdb.timestamps;
-    this.base = jsdb.base;
-    this.name = name;
+  public get path(): string {
+    return this.PATH;
+  }
 
-    this.file = `${name}.json`;
-    this.path = join(this.base, this.file);
+  constructor(db: Database, name: string) {
+    this.TIMESTAMPS = db.timestamps;
+    this.DATABASE = db.path;
+    this.PATH = join(this.DATABASE, `${name}.json`);
 
     this.createIfNotExists();
   }
 
   public async parse() {
-    return await readJSON(this.path);
+    return await readJSON(this.PATH);
   }
 
   public async truncate() {
-    return await writeJSON([], this.path);
+    return await writeJSON([], this.PATH);
   }
 
   public async push(...args: any[]) {
@@ -40,7 +39,7 @@ export default class DataBase {
     args.forEach((item) => {
       item.id = wuid();
 
-      if (this.timestamps) {
+      if (this.TIMESTAMPS) {
         item.createdAt = new Date();
         item.updatedAt = null;
       }
@@ -48,7 +47,7 @@ export default class DataBase {
 
     data.push(...args);
 
-    await writeJSON(data, this.path);
+    await writeJSON(data, this.PATH);
 
     return args;
   }
@@ -58,7 +57,7 @@ export default class DataBase {
 
     if (item) {
       data[index] = { ...item, ...value, id: item.id };
-      await writeJSON(data, this.path);
+      await writeJSON(data, this.PATH);
       return data[index];
     }
 
@@ -70,7 +69,7 @@ export default class DataBase {
 
     if (item) {
       data[index] = { ...value, id: item.id };
-      await writeJSON(data, this.path);
+      await writeJSON(data, this.PATH);
       return data[index];
     }
 
@@ -82,7 +81,7 @@ export default class DataBase {
 
     if (item) {
       data.splice(index, 1);
-      return writeJSON(data, this.path);
+      return writeJSON(data, this.PATH);
     }
 
     return Promise.reject(id);
@@ -110,16 +109,18 @@ export default class DataBase {
     items.forEach((item: any) => {
       const index = data.findIndex((obj: any) => obj.id === item.id);
 
-      if (this.timestamps) {
-        item.createdAt = item.createdAt || new Date();
-        item.updatedAt = new Date();
+      if (this.TIMESTAMPS) {
+        const now = new Date();
+
+        item.createdAt = item.createdAt || now;
+        item.updatedAt = now;
       }
 
       data[index] = { ...item, ...value, id: item.id };
     });
 
-    await writeJSON(data, this.path);
-    return items.length;
+    await writeJSON(data, this.PATH);
+    return items;
   }
 
   public async filterReplace(value: any, filter: (value: any) => boolean) {
@@ -132,16 +133,18 @@ export default class DataBase {
     items.forEach((item: any) => {
       const index = data.findIndex((obj: any) => obj.id === item.id);
 
-      if (this.timestamps) {
-        item.createdAt = item.createdAt || new Date();
-        item.updatedAt = new Date();
+      if (this.TIMESTAMPS) {
+        const now = new Date();
+
+        item.createdAt = item.createdAt || now;
+        item.updatedAt = now;
       }
 
       data[index] = { ...value, id: item.id };
     });
 
-    await writeJSON(data, this.path);
-    return items.length;
+    await writeJSON(data, this.PATH);
+    return items;
   }
 
   public async filterDelete(filter: (value: any) => boolean) {
@@ -154,17 +157,14 @@ export default class DataBase {
       data.splice(index, 1);
     });
 
-    return writeJSON(data, this.path);
+    await writeJSON(data, this.PATH);
+    return items.length;
   }
 
-  // --- Privates ---
+  // --- Privates --- //
 
   private createIfNotExists() {
-    const ok = existsSync(this.path);
-
-    if (!ok) {
-      writeFileSync(this.path, '[]', 'utf8');
-    }
+    return existsSync(this.PATH) || writeFileSync(this.PATH, '[]', 'utf8');
   }
 
   private async findToUpdate(value: any, find?: (value: any) => boolean) {
@@ -178,7 +178,7 @@ export default class DataBase {
     const index = data.findIndex(fn);
     const item = data[index];
 
-    if (item && this.timestamps) {
+    if (item && this.TIMESTAMPS) {
       item.creaatedAt = item.creaatedAt || new Date();
       item.updatedAt = new Date();
     }

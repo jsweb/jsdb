@@ -51,9 +51,9 @@ yarn add @jsweb/jsdb
 ## Usage
 
 ```javascript
-import Databse from '@jsweb/jsdb'
+import { Database } from '@jsweb/jsdb'
 
-const db = new Databse('base', 'path', 'dir') // or just base/path/dir
+const db = new Database('base', 'path', 'dir') // or just base/path/dir
 
 const posts = db.store('posts') // a JSON store into db
 ```
@@ -105,7 +105,7 @@ Just import and instance a database into a base path.
 Database instance have a public `get` for the base dir absolute path, and public `get/set` for auto timestamps.
 
 ```javascript
-import Database from '@jsweb/jsdb'
+import { Database } from '@jsweb/jsdb'
 
 const db = new Database('base', 'path', 'dir')
 
@@ -129,7 +129,7 @@ Turning on auto timestamps will include `createdAt` and `updatedAt` automatic fi
 Use it to drop a store from database. JSON file will be deleted.
 
 ```javascript
-import Database from '@jsweb/jsdb'
+import { Database } from '@jsweb/jsdb'
 
 const db = new Database('base', 'path', 'dir')
 
@@ -141,7 +141,7 @@ db.drop('posts')
 Use it to instance a JSON store from database. JSON file will be created, if it not exists.
 
 ```javascript
-import Database from '@jsweb/jsdb'
+import { Database } from '@jsweb/jsdb'
 
 const db = new Database('base', 'path', 'dir')
 
@@ -163,7 +163,7 @@ All methods from store instance are `async`, so it is necessary to use them in P
 Exemple:
 
 ```javascript
-import Database from '@jsweb/jsdb'
+import { Database } from '@jsweb/jsdb'
 
 const db = new Database('base', 'path', 'dir')
 

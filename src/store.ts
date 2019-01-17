@@ -1,7 +1,7 @@
 import { wuid } from '@jsweb/randkey';
 import { existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import Database from './module';
+import Database from './database';
 import { readJSON, writeJSON } from './utils/files';
 
 export default class Store {
